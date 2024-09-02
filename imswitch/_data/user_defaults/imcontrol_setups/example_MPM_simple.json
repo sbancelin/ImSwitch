@@ -1,0 +1,119 @@
+{
+	"detectors": {
+		"PMTanalog": {
+			"analogChannel": null,
+			"digitalLine": null,
+			"managerName": "PMTanalogManager",
+			"managerProperties": {
+			  "AIchannel": "Dev1/ai0",
+			  "cameraListIndex": null
+			},
+			"forAcquisition": true
+		}
+	},
+	"lasers": {
+		"MockLaser": {
+			"analogChannel": null,
+			"digitalLine": null,
+			"managerName": "ThorlabsMockLaserManager",
+			"managerProperties": {
+				"serial_no_shutter": 68800404,
+				"serial_no_rotator": 0
+			},
+			"wavelength": 561,
+			"valueRangeMin": 0,
+			"valueRangeMax": 180,
+			"valueRangeStep": 1
+		  }
+	},
+	"positioners": {
+        "ND-GalvoX": {
+			"analogChannel": "Dev1/ao0",
+			"digitalLine": null,
+			"managerName": "NidaqPositionerManager",
+			"managerProperties": {
+				"conversionFactor": 10,
+				"minVolt": -10,
+				"maxVolt": 10,
+				"vel_max": 7e-2,
+				"acc_max": 1e-4
+			},
+			"axes": ["X"],
+			"forScanning": true
+		},
+		"ND-GalvoY": {
+			"analogChannel": "Dev1/ao1",
+			"digitalLine": null,
+			"managerName": "NidaqPositionerManager",
+			"managerProperties": {
+				"conversionFactor": 10,
+				"minVolt": -10,
+				"maxVolt": 10,
+				"vel_max": 7e-2,
+				"acc_max": 1e-4
+			},
+			"axes": ["Y"],
+			"forScanning": true
+		},
+		"PiFOC": {
+			"analogChannel": null,
+			"digitalLine": null,
+			"managerName": "PiezoconceptZManager",
+			"managerProperties": {
+				"rs232device": "pczpiezo"
+			},
+			"axes": ["Z"],
+			"forPositioning": true,
+			"forScanning": true
+		}
+    },
+    "scan": {
+		"scanWidgetType": "PointScan",
+		"scanDesigner": "GalvoScanDesigner",
+		"scanDesignerParams": {},
+		"TTLCycleDesigner": "PointScanTTLCycleDesigner",
+		"TTLCycleDesignerParams": {},
+		"sampleRate": 100000,
+		"lineClockLine": "Dev1/port0/line5",
+		"frameClockLine": "Dev1/port0/line6"
+    },
+    "nidaq": {
+		"timerCounterChannel": "Dev1/ctr2",
+		"startTrigger": true
+	},
+	"rs232devices": {
+		"pczpiezo": {
+      		"managerName": "RS232Manager",
+      		"managerProperties": {
+        		"port": "ASRL5::INSTR",
+        		"encoding": "ascii",
+        		"recv_termination": "\n",
+        		"send_termination": "\n",
+        		"baudrate": 115200,
+        		"bytesize": 8,
+        		"parity": "none",
+        		"stopbits": 1,
+        		"rtscts": "false",
+        		"dsrdtr": "false",
+        		"xonxoff": "false"
+      		}
+    	}
+  	},
+	"rois": {
+		"Full chip": {
+			"x": 0,
+			"y": 0,
+			"w": 2448,
+			"h": 2048
+		}
+	},
+    "availableWidgets": [
+		"View",
+		"Laser",
+		"Positioner",
+		"Scan",
+		"Image",
+		"Settings",
+		"Recording"
+    ]
+}
