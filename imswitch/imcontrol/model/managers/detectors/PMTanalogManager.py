@@ -3,6 +3,8 @@ from imswitch.imcommon.framework import Signal, Thread, Worker
 from imswitch.imcommon.model import initLogger
 from .DetectorManager import DetectorManager
 
+#TEst
+
 class PMTanalogManager(DetectorManager):
     """ DetectorManager that deals with a photomultiplier tube connected to an
     analog input on a Nidaq card.
