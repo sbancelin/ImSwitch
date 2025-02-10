@@ -12,13 +12,13 @@ class ScanWidgetPointScan(SuperScanWidget):
         self.seqTimePar = QtWidgets.QLineEdit('0.02')  # ms
         self.scanTimePar = QtWidgets.QLineEdit('1') #s
         self.scanTimePar.setEnabled(False)
-        # self.phaseDelayPar = QtWidgets.QLineEdit('100')  # samples
+        self.phaseDelayPar = QtWidgets.QLineEdit('100')  # samples
         # self.d3StepDelayPar = QtWidgets.QLineEdit('0')  # samples
 
         self.scanPar = {
                         'seqTime': self.seqTimePar,
                         'ScanTimePar': self.scanTimePar,
-                        # 'phaseDelay': self.phaseDelayPar,
+                        'phaseDelay': self.phaseDelayPar,
                         #'frameDelay': self.d3StepDelayPar
                         }
 
@@ -28,7 +28,7 @@ class ScanWidgetPointScan(SuperScanWidget):
         # self.seqTimePar.textChanged.connect(self.sigSeqTimeParChanged)
         self.seqTimePar.textChanged.connect(self.updateScanTime)
         # self.scanTimePar.textChanged.connect(self.updateScanTime)
-        # self.phaseDelayPar.textChanged.connect(self.sigStageParChanged)
+        self.phaseDelayPar.textChanged.connect(self.sigStageParChanged)
         # self.d3StepDelayPar.textChanged.connect(self.sigStageParChanged)
 
     def initControls(self, positionerNames, TTLDeviceNames):
@@ -137,8 +137,8 @@ class ScanWidgetPointScan(SuperScanWidget):
         currentRow += 1
         
         # Add detection phase delay parameter
-        # self.grid.addWidget(QtWidgets.QLabel('Phase delay (samples):'), currentRow, 5)
-        # self.grid.addWidget(self.phaseDelayPar, currentRow, 6)
+        self.grid.addWidget(QtWidgets.QLabel('Phase delay (samples):'), currentRow, 5)
+        self.grid.addWidget(self.phaseDelayPar, currentRow, 6)
 
         currentRow += 1
         
@@ -211,8 +211,8 @@ class ScanWidgetPointScan(SuperScanWidget):
     def getSeqTimePar(self):
         return float(self.seqTimePar.text()) / 1000
 
-    #def getPhaseDelayPar(self):
-    #    return float(self.phaseDelayPar.text())
+    def getPhaseDelayPar(self):
+        return float(self.phaseDelayPar.text())
 
     #def getd3StepDelayPar(self):
     #    return float(self.d3StepDelayPar.text())
@@ -235,8 +235,8 @@ class ScanWidgetPointScan(SuperScanWidget):
     def setSeqTimePar(self, seqTimePar):
         self.seqTimePar.setText(str(round(float(1000 * seqTimePar), 3)))
 
-    # def setPhaseDelayPar(self, phaseDelayPar):
-    #    self.phaseDelayPar.setText(str(round(int(phaseDelayPar))))
+    def setPhaseDelayPar(self, phaseDelayPar):
+        self.phaseDelayPar.setText(str(round(int(phaseDelayPar))))
 
     #def setd3StepDelayPar(self, d3StepDelayPar):
     #    self.d3StepDelayPar.setText(str(round(int(d3StepDelayPar))))

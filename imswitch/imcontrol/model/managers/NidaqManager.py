@@ -94,7 +94,7 @@ class NidaqManager(SignalInterface):
         #self.__logger.debug(f'Created DO task: {name}')
         return dotask
 
-    def __createChanCOTask(self, name, channel, rate, sampsInScan=1000, starttrig=False,
+    """def __createChanCOTask(self, name, channel, rate, sampsInScan=1000, starttrig=False,
                            reference_trigger='ai/StartTrigger'):
         cotask = nidaqmx.Task(name)
         self.cotaskchannel = cotask.co_channels.add_co_pulse_chan_freq(
@@ -109,7 +109,7 @@ class NidaqManager(SignalInterface):
             cotask.triggers.arm_start_trigger.trig_type = nidaqmx.constants.TriggerType.DIGITAL_EDGE
 
         #self.__logger.debug(f'Created CO task: {name}')
-        return cotask
+        return cotask"""
 
     def __createChanCITask(self, name, channel, acquisitionType, source, rate, sampsInScan=1000,
                            starttrig=False, reference_trigger='ai/StartTrigger', terminal='PFI0'):
@@ -156,13 +156,25 @@ class NidaqManager(SignalInterface):
         #self.__logger.debug(f'Created CO task: {name}')
         return cotask
 
-    def __createChanAITask(self, name, channels, acquisitionType, source, rate,
-                           min_val=-0.5, max_val=10.0, sampsInScan=1000, starttrig=False,
+    def __createChanAITask(self, name, channel, acquisitionType, source, rate,
+                           #min_val=-0.5, max_val=10.0,
+                           sampsInScan=1000, starttrig=False,
                            reference_trigger='ai/StartTrigger'):
         """ Simplified function to create an analog input task """
         if self.__simulating:
             return None
+        # Check if a task with the same name already exists and clear it
+        try:
+            existing_task = nidaqmx.Task(name)
+            existing_task.close()  # Close the existing task to avoid conflicts
+        except nidaqmx.errors.DaqError as e:
+            # Handle case where task does not exist (normal behavior)
+            pass
+         # Now proceed with task creation
+
         aitask = nidaqmx.Task(name)
+        #channels = np.atleast_1d(channels)
+        #print('channels:', channels)
 
         if acquisitionType == 'finite':
             acqType = nidaqmx.constants.AcquisitionType.FINITE

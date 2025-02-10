@@ -12,10 +12,24 @@
 		}
 	},
 	"lasers": {
+		"Alphanov_mock": {
+			"analogChannel": null,
+			"digitalLine": null,
+			"managerName": "ThorlabsMockLaserManager",
+			"managerProperties": {
+				"serial_no_rotator": "27005331",
+				"conversion_factor": 1919.14,
+				"velocity": 429410
+			},
+			"wavelength": 750,
+			"valueRangeMin": 0,
+			"valueRangeMax": 180,
+			"valueRangeStep": 1
+		  },
 		  "Mira 900": {
 			"analogChannel": null,
 			"digitalLine": null,
-			"managerName": "MockLaserManager",
+			"managerName": "ThorlabsMockLaserManager",
 			"managerProperties": {
 				"serial_no_rotator": "27269600",
 				"conversion_factor": 1919.14,
@@ -29,7 +43,7 @@
 	},
 	"shutters": {
 		"Main_shutter": {
-			"managerName": "MockShutterManager",
+			"managerName": "ThorlabsShutterManager",
 			"managerProperties": {
 				"serial_no_shutter": "68800404"
 			}
@@ -71,7 +85,7 @@
 		"Z-Vcoil": {
 			"analogChannel": null,
 			"digitalLine": null,
-			"managerName": "MockPositionerManager",
+			"managerName": "PIFOCManager",
 			"managerProperties": {
 				"serialnum": "123041734",
 				"vel": 100,

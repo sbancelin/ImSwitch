@@ -212,7 +212,7 @@ class PointScanTTLCycleDesigner(TTLCycleDesigner):
             # pad start zeros
             signal = np.append(np.zeros(zeropad_start, dtype='bool'), signal)
             # pad scanner phase delay to beginning to sync actual position with TTL
-            #signal = np.append(np.zeros(zeropad_phasedelay, dtype='bool'), signal)
+            # signal = np.append(np.zeros(zeropad_phasedelay, dtype='bool'), signal)
 
             # adjust to same length as analog scanning
             zeropad_end = samples_total - len(signal)

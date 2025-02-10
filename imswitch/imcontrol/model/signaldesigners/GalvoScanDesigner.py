@@ -70,10 +70,11 @@ class GalvoScanDesigner(ScanDesigner):
         # arbitrary for now - should calculate this based on the abs(biggest) axis_centerpos and the
         # max speed/acc, as that is what limits time it takes for axes to get to the right position
         self.__minsettlingtime = 1000
-        self.__paddingtime_d3step = int(parameterDict['d3step_delay'])
+        #self.__paddingtime_d3step = int(parameterDict['d3step_delay'])
         # arbitrary for now  µs
         self.__paddingtime_full = 100 #1000
         # initiate default sample lengths
+        # self._samples_initpos = []
         self._samples_initpos = []
         self._samples_finalpos = []
         self._samples_settling = 0
