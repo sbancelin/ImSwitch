@@ -18,11 +18,14 @@ class MockPositionerManager(PositionerManager):
                                
         super().__init__(positionerInfo, name, initialPosition={
             axis: 0 for axis in positionerInfo.axes
-        }, initialSpeed={axis: 0 for axis in positionerInfo.axes})
+        })
 
     def move(self, dist, axis, is_blocking = False):
         for d,a in zip(dist,axis):
             self.setPosition(self._position[a] + d, a)
+
+    def moveForever(self, speed=(0, 0, 0, 0), is_stop=False):
+        pass
 
     def setPosition(self, position, axis):
         self._position[axis] = position

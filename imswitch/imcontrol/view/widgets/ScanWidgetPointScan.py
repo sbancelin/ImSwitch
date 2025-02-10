@@ -10,21 +10,26 @@ class ScanWidgetPointScan(SuperScanWidget):
         super().__init__(*args, **kwargs)
 
         self.seqTimePar = QtWidgets.QLineEdit('0.02')  # ms
-        self.phaseDelayPar = QtWidgets.QLineEdit('100')  # samples
-        self.d3StepDelayPar = QtWidgets.QLineEdit('0')  # samples
+        self.scanTimePar = QtWidgets.QLineEdit('1') #s
+        self.scanTimePar.setEnabled(False)
+        # self.phaseDelayPar = QtWidgets.QLineEdit('100')  # samples
+        # self.d3StepDelayPar = QtWidgets.QLineEdit('0')  # samples
 
         self.scanPar = {
                         'seqTime': self.seqTimePar,
-                        'phaseDelay': self.phaseDelayPar,
-                        'frameDelay': self.d3StepDelayPar
+                        'ScanTimePar': self.scanTimePar,
+                        # 'phaseDelay': self.phaseDelayPar,
+                        #'frameDelay': self.d3StepDelayPar
                         }
 
         self.ttlParameters = {}
 
         # Connect signals
-        self.seqTimePar.textChanged.connect(self.sigSeqTimeParChanged)
-        self.phaseDelayPar.textChanged.connect(self.sigStageParChanged)
-        self.d3StepDelayPar.textChanged.connect(self.sigStageParChanged)
+        # self.seqTimePar.textChanged.connect(self.sigSeqTimeParChanged)
+        self.seqTimePar.textChanged.connect(self.updateScanTime)
+        # self.scanTimePar.textChanged.connect(self.updateScanTime)
+        # self.phaseDelayPar.textChanged.connect(self.sigStageParChanged)
+        # self.d3StepDelayPar.textChanged.connect(self.sigStageParChanged)
 
     def initControls(self, positionerNames, TTLDeviceNames):
         currentRow = 0
@@ -58,18 +63,19 @@ class ScanWidgetPointScan(SuperScanWidget):
         # Add param labels
         sizeLabel = QtWidgets.QLabel('Size (µm)')
         stepLabel = QtWidgets.QLabel('Step size (µm)')
-        pixelsLabel = QtWidgets.QLabel('Pixels (#)')
         centerLabel = QtWidgets.QLabel('Center (µm)')
+        pixelsLabel = QtWidgets.QLabel('Pixels (#)')
         scandimLabel = QtWidgets.QLabel('Scan dim')
         sizeLabel.setAlignment(QtCore.Qt.AlignLeft | QtCore.Qt.AlignBottom)
         stepLabel.setAlignment(QtCore.Qt.AlignLeft | QtCore.Qt.AlignBottom)
-        pixelsLabel.setAlignment(QtCore.Qt.AlignLeft | QtCore.Qt.AlignBottom)
         centerLabel.setAlignment(QtCore.Qt.AlignLeft | QtCore.Qt.AlignBottom)
+        pixelsLabel.setAlignment(QtCore.Qt.AlignLeft | QtCore.Qt.AlignBottom)
         scandimLabel.setAlignment(QtCore.Qt.AlignLeft | QtCore.Qt.AlignBottom)
         self.grid.addWidget(sizeLabel, currentRow, 1)
         self.grid.addWidget(stepLabel, currentRow, 2)
-        self.grid.addWidget(pixelsLabel, currentRow, 3)
-        self.grid.addWidget(centerLabel, currentRow, 4)
+        self.grid.addWidget(centerLabel, currentRow, 3)
+        self.grid.addWidget(pixelsLabel, currentRow, 4)
+
         self.grid.addWidget(scandimLabel, currentRow, 6)
         currentRow += 1
 
@@ -82,19 +88,20 @@ class ScanWidgetPointScan(SuperScanWidget):
                 stepSizePar.setText('-')
                 stepSizePar.setEnabled(False)
             self.scanPar['stepSize' + positionerName] = stepSizePar
-            numPixelsPar = QtWidgets.QLineEdit('50')
-            numPixelsPar.setEnabled(False)
-            self.scanPar['pixels' + positionerName] = numPixelsPar
             centerPar = QtWidgets.QLineEdit('0')
             self.scanPar['center' + positionerName] = centerPar
             if 'mock' in positionerName.lower():
                 centerPar.setText('-')
                 centerPar.setEnabled(False)
+            numPixelsPar = QtWidgets.QLineEdit('50')
+            numPixelsPar.setEnabled(False)
+            self.scanPar['pixels' + positionerName] = numPixelsPar
             self.grid.addWidget(QtWidgets.QLabel(positionerName), currentRow, 0)
             self.grid.addWidget(sizePar, currentRow, 1)
             self.grid.addWidget(stepSizePar, currentRow, 2)
-            self.grid.addWidget(numPixelsPar, currentRow, 3)
-            self.grid.addWidget(centerPar, currentRow, 4)
+            self.grid.addWidget(centerPar, currentRow, 3)
+            self.grid.addWidget(numPixelsPar, currentRow, 4)
+            
 
             # Scan dimension label and picker
             dimlabel = QtWidgets.QLabel(
@@ -113,29 +120,31 @@ class ScanWidgetPointScan(SuperScanWidget):
             # Connect signals
             self.scanPar['size' + positionerName].textChanged.connect(self.sigStageParChanged)
             self.scanPar['stepSize' + positionerName].textChanged.connect(self.sigStageParChanged)
-            self.scanPar['pixels' + positionerName].textChanged.connect(self.sigStageParChanged)
+            self.scanPar['pixels' + positionerName].textChanged.connect(self.updateScanTime)
             self.scanPar['center' + positionerName].textChanged.connect(self.sigStageParChanged)
-            self.scanPar['scanDim' + str(index)].currentIndexChanged.connect(
-                self.sigStageParChanged
-            )
+            self.scanPar['scanDim' + str(index)].currentIndexChanged.connect(self.sigStageParChanged)
+            #numPixelsPar.textChanged.connect(self.updateScanTime)
 
         currentRow += 1
 
         # Add dwell time parameter
-        self.grid.addWidget(QtWidgets.QLabel('Dwell time (ms):'), currentRow, 5)
-        self.grid.addWidget(self.seqTimePar, currentRow, 6)
+        self.grid.addWidget(QtWidgets.QLabel('Dwell time (ms):'), currentRow, 0)
+        self.grid.addWidget(self.seqTimePar, currentRow, 1)
+
+        self.grid.addWidget(QtWidgets.QLabel('Scan time (s):'), currentRow, 3)
+        self.grid.addWidget(self.scanTimePar, currentRow, 4)
 
         currentRow += 1
         
         # Add detection phase delay parameter
-        self.grid.addWidget(QtWidgets.QLabel('Phase delay (samples):'), currentRow, 5)
-        self.grid.addWidget(self.phaseDelayPar, currentRow, 6)
+        # self.grid.addWidget(QtWidgets.QLabel('Phase delay (samples):'), currentRow, 5)
+        # self.grid.addWidget(self.phaseDelayPar, currentRow, 6)
 
         currentRow += 1
         
         # Add scan d3 step delay parameter
-        self.grid.addWidget(QtWidgets.QLabel('D3 step delay (samples):'), currentRow, 5)
-        self.grid.addWidget(self.d3StepDelayPar, currentRow, 6)
+        # self.grid.addWidget(QtWidgets.QLabel('D3 step delay (samples):'), currentRow, 5)
+        # self.grid.addWidget(self.d3StepDelayPar, currentRow, 6)
 
         # Add space item to make the grid look nicer
         self.grid.addItem(
@@ -146,13 +155,13 @@ class ScanWidgetPointScan(SuperScanWidget):
         currentRow += 1
 
         # TTL param labels
-        sequenceLabel = QtWidgets.QLabel('Sequence (h#,l#,...)')
-        sequenceLabel.setAlignment(QtCore.Qt.AlignLeft | QtCore.Qt.AlignBottom)
-        self.grid.addWidget(sequenceLabel, currentRow, 1)
-        sequenceAxisLabel = QtWidgets.QLabel('Axis')
-        sequenceAxisLabel.setAlignment(QtCore.Qt.AlignLeft | QtCore.Qt.AlignBottom)
-        self.grid.addWidget(sequenceAxisLabel, currentRow, 2)
-        currentRow += 1
+        #sequenceLabel = QtWidgets.QLabel('Sequence (h#,l#,...)')
+        #sequenceLabel.setAlignment(QtCore.Qt.AlignLeft | QtCore.Qt.AlignBottom)
+        #self.grid.addWidget(sequenceLabel, currentRow, 1)
+        #sequenceAxisLabel = QtWidgets.QLabel('Axis')
+        #sequenceAxisLabel.setAlignment(QtCore.Qt.AlignLeft | QtCore.Qt.AlignBottom)
+        #self.grid.addWidget(sequenceAxisLabel, currentRow, 2)
+        #currentRow += 1
 
         for deviceName in TTLDeviceNames:
             # TTL sequence param
@@ -202,11 +211,11 @@ class ScanWidgetPointScan(SuperScanWidget):
     def getSeqTimePar(self):
         return float(self.seqTimePar.text()) / 1000
 
-    def getPhaseDelayPar(self):
-        return float(self.phaseDelayPar.text())
+    #def getPhaseDelayPar(self):
+    #    return float(self.phaseDelayPar.text())
 
-    def getd3StepDelayPar(self):
-        return float(self.d3StepDelayPar.text())
+    #def getd3StepDelayPar(self):
+    #    return float(self.d3StepDelayPar.text())
 
     def setScanPixels(self, positionerName, pixels):
         txt = str(pixels) if pixels > 1 else '-'
@@ -226,14 +235,30 @@ class ScanWidgetPointScan(SuperScanWidget):
     def setSeqTimePar(self, seqTimePar):
         self.seqTimePar.setText(str(round(float(1000 * seqTimePar), 3)))
 
-    def setPhaseDelayPar(self, phaseDelayPar):
-        self.phaseDelayPar.setText(str(round(int(phaseDelayPar))))
+    # def setPhaseDelayPar(self, phaseDelayPar):
+    #    self.phaseDelayPar.setText(str(round(int(phaseDelayPar))))
 
-    def setd3StepDelayPar(self, d3StepDelayPar):
-        self.d3StepDelayPar.setText(str(round(int(d3StepDelayPar))))
+    #def setd3StepDelayPar(self, d3StepDelayPar):
+    #    self.d3StepDelayPar.setText(str(round(int(d3StepDelayPar))))
 
     def setScanMode(self):
         pass
+
+    def updateScanTime(self):
+        try:
+            dwell_time = float(self.seqTimePar.text()) / 1000  # Convert to seconds
+            pixel_values = [
+                int(self.scanPar[key].text()) for key in self.scanPar if key.startswith('pixels')
+            ]
+            if len(pixel_values) >= 2:
+                total_pixels = pixel_values[0] * pixel_values[1]
+            else:
+                total_pixels = 0
+            scan_time = dwell_time * total_pixels if total_pixels > 0 else 0
+            self.scanTimePar.setText(f'{scan_time:.3f}')
+        except ValueError:
+            self.scanTimePar.setText('0')
+
 
 
 # Copyright (C) 2020-2023 ImSwitch developers

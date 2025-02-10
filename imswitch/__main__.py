@@ -3,9 +3,32 @@ import traceback
 import logging
 import argparse
 import os
+import tkinter as tk
+from tkinter import filedialog
 
 import imswitch
-def main(is_headless:bool=None, default_config:str=None, http_port:int=None, ssl:bool=None, config_folder:str=None,
+
+def select_config_gui():
+    """Open a dialog box to choose de .JSON file"""
+    root = tk.Tk()
+    root.withdraw()  # Hide main window
+
+    # 🔹 Define default folder
+    default_folder = "C:\\ImSwitch\\imswitch\\_data\\user_defaults\\imcontrol_setups"
+
+    # Check is the folder exists, otherwise fallback on Documents
+    if not os.path.exists(default_folder):
+        default_folder = os.path.join(os.path.expanduser("~"), "Documents")
+
+    config_path = filedialog.askopenfilename(
+        initialdir=default_folder,
+        title="Sélectionnez un fichier de configuration",
+        filetypes=[("JSON Files", "*.json")]
+    )
+
+    return config_path if config_path else None
+
+def main(is_headless:bool=None, default_config:str=None, http_port:int=None, config_folder:str=None,
          data_folder: str=None):
     '''
     To start imswitch in headless using the arguments, you can call the main file with the following arguments:
@@ -27,10 +50,6 @@ def main(is_headless:bool=None, default_config:str=None, http_port:int=None, ssl
             # specify http port
             parser.add_argument('--http-port', dest='http_port', type=int, default=8001,
                                 help='specify http port')
-
-            # specify ssl
-            parser.add_argument('--no-ssl', dest='ssl', default=True, action='store_false',
-                                help='specify ssl')
             
             # specify the config folder (e.g. if running from a different location / container)
             parser.add_argument('--config-folder', dest='config_folder', type=str, default=None,
@@ -43,14 +62,25 @@ def main(is_headless:bool=None, default_config:str=None, http_port:int=None, ssl
             
             imswitch.IS_HEADLESS = args.headless            # if True, no QT will be loaded   
             imswitch.__httpport__ = args.http_port          # e.g. 8001
-            imswitch.__ssl__ = args.ssl                     # if True, ssl will be used (e.g. https)
             
-            if type(args.config_file)==str and args.config_file.find("json")>=0:  # e.g. example_virtual_microscope.json
-                imswitch.DEFAULT_SETUP_FILE = args.config_file  
+            # 🔹 AJOUTÉ : Si aucun fichier de configuration n'est fourni, demander à l'utilisateur
+            if args.config_file is None:
+                print("Aucun fichier de configuration spécifié. Veuillez en sélectionner un.")
+                selected_file = select_config_gui()
+                if selected_file:
+                    args.config_file = selected_file
+                else:
+                    print("Aucune configuration sélectionnée, fermeture.")
+                    exit(1)
+
+            # 🔹 Modifié : Maintenant args.config_file contient toujours un chemin valide
+            if type(args.config_file) == str and args.config_file.find("json") >= 0: # e.g. example_virtual_microscope.json
+                imswitch.DEFAULT_SETUP_FILE = args.config_file
             if os.path.isdir(args.config_folder):
-                imswitch.DEFAULT_CONFIG_PATH = args.config_folder # e.g. /Users/USER/ in case an alternative path is used
+                imswitch.DEFAULT_CONFIG_PATH = args.config_folder  # e.g. /Users/USER/ if using an alternative path
             if os.path.isdir(args.data_folder):
-                imswitch.DEFAULT_DATA_PATH = args.data_folder # e.g. /Users/USER/ in case an alternative path is used
+                imswitch.DEFAULT_DATA_PATH = args.data_folder  # e.g. /Users/USER/ for storing data elsewhere
+
             
         except Exception as e:
             print(e)
@@ -65,9 +95,6 @@ def main(is_headless:bool=None, default_config:str=None, http_port:int=None, ssl
         if http_port is not None:
             print("We use the user-provided http port: " + str(http_port))
             imswitch.__httpport__ = http_port
-        if ssl is not None:
-            print("We use the user-provided ssl: " + str(ssl))
-            imswitch.__ssl__ = ssl
         if config_folder is not None:
             print("We use the user-provided configuration path: " + config_folder)
             imswitch.DEFAULT_CONFIG_PATH = config_folder
@@ -171,6 +198,30 @@ def main(is_headless:bool=None, default_config:str=None, http_port:int=None, ssl
             launchApp(app, multiModuleWindow, moduleMainControllers.values())
     except Exception as e:
         logging.error(traceback.format_exc())
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 if __name__ == '__main__':

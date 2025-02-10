@@ -7,7 +7,6 @@ from .BeadRecController import BeadRecController
 from .ConsoleController import ConsoleController
 from .EtSTEDController import EtSTEDController
 from .FFTController import FFTController
-from .HoloController import HoloController
 from .JoystickController import JoystickController
 from .HistogrammController import HistogrammController
 from .STORMReconController import STORMReconController
