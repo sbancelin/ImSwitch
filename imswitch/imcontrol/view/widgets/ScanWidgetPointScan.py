@@ -13,7 +13,7 @@ class ScanWidgetPointScan(SuperScanWidget):
         self.scanTimePar = QtWidgets.QLineEdit('1') #s
         self.scanTimePar.setEnabled(False)
         self.phaseDelayPar = QtWidgets.QLineEdit('100')  # samples
-        # self.d3StepDelayPar = QtWidgets.QLineEdit('0')  # samples
+        self.d3StepDelayPar = QtWidgets.QLineEdit('0')  # samples
 
         self.scanPar = {
                         'seqTime': self.seqTimePar,
@@ -29,7 +29,7 @@ class ScanWidgetPointScan(SuperScanWidget):
         self.seqTimePar.textChanged.connect(self.updateScanTime)
         # self.scanTimePar.textChanged.connect(self.updateScanTime)
         self.phaseDelayPar.textChanged.connect(self.sigStageParChanged)
-        # self.d3StepDelayPar.textChanged.connect(self.sigStageParChanged)
+        self.d3StepDelayPar.textChanged.connect(self.sigStageParChanged)
 
     def initControls(self, positionerNames, TTLDeviceNames):
         currentRow = 0
@@ -143,8 +143,8 @@ class ScanWidgetPointScan(SuperScanWidget):
         currentRow += 1
         
         # Add scan d3 step delay parameter
-        # self.grid.addWidget(QtWidgets.QLabel('D3 step delay (samples):'), currentRow, 5)
-        # self.grid.addWidget(self.d3StepDelayPar, currentRow, 6)
+        self.grid.addWidget(QtWidgets.QLabel('D3 step delay (samples):'), currentRow, 5)
+        self.grid.addWidget(self.d3StepDelayPar, currentRow, 6)
 
         # Add space item to make the grid look nicer
         self.grid.addItem(
@@ -214,8 +214,8 @@ class ScanWidgetPointScan(SuperScanWidget):
     def getPhaseDelayPar(self):
         return float(self.phaseDelayPar.text())
 
-    #def getd3StepDelayPar(self):
-    #    return float(self.d3StepDelayPar.text())
+    def getd3StepDelayPar(self):
+        return float(self.d3StepDelayPar.text())
 
     def setScanPixels(self, positionerName, pixels):
         txt = str(pixels) if pixels > 1 else '-'
@@ -238,8 +238,8 @@ class ScanWidgetPointScan(SuperScanWidget):
     def setPhaseDelayPar(self, phaseDelayPar):
         self.phaseDelayPar.setText(str(round(int(phaseDelayPar))))
 
-    #def setd3StepDelayPar(self, d3StepDelayPar):
-    #    self.d3StepDelayPar.setText(str(round(int(d3StepDelayPar))))
+    def setd3StepDelayPar(self, d3StepDelayPar):
+        self.d3StepDelayPar.setText(str(round(int(d3StepDelayPar))))
 
     def setScanMode(self):
         pass

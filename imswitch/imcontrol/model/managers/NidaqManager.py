@@ -94,23 +94,6 @@ class NidaqManager(SignalInterface):
         #self.__logger.debug(f'Created DO task: {name}')
         return dotask
 
-    """def __createChanCOTask(self, name, channel, rate, sampsInScan=1000, starttrig=False,
-                           reference_trigger='ai/StartTrigger'):
-        cotask = nidaqmx.Task(name)
-        self.cotaskchannel = cotask.co_channels.add_co_pulse_chan_freq(
-            channel, freq=rate, units=nidaqmx.constants.FrequencyUnits.HZ
-        )
-        # cotask.timing.cfg_implicit_timing(sample_mode=nidaqmx.constants.AcquisitionType.CONTINUOUS)
-        cotask.timing.cfg_implicit_timing(sample_mode=nidaqmx.constants.AcquisitionType.FINITE,
-                                          samps_per_chan=sampsInScan)
-
-        if starttrig:
-            cotask.triggers.arm_start_trigger.dig_edge_src = reference_trigger
-            cotask.triggers.arm_start_trigger.trig_type = nidaqmx.constants.TriggerType.DIGITAL_EDGE
-
-        #self.__logger.debug(f'Created CO task: {name}')
-        return cotask"""
-
     def __createChanCITask(self, name, channel, acquisitionType, source, rate, sampsInScan=1000,
                            starttrig=False, reference_trigger='ai/StartTrigger', terminal='PFI0'):
         """ Simplified function to create a counter input task """
@@ -144,10 +127,12 @@ class NidaqManager(SignalInterface):
                            reference_trigger='ai/StartTrigger'):
         if self.__simulating:
             return None
+        
         cotask = nidaqmx.Task(name)
         self.cotaskchannel = cotask.co_channels.add_co_pulse_chan_freq(
             channel, freq=rate, units=nidaqmx.constants.FrequencyUnits.HZ
         )
+        # cotask.timing.cfg_implicit_timing(sample_mode=nidaqmx.constants.AcquisitionType.CONTINUOUS)
         cotask.timing.cfg_implicit_timing(sample_mode=nidaqmx.constants.AcquisitionType.FINITE,
                                           samps_per_chan=sampsInScan)
         if starttrig:
@@ -163,14 +148,6 @@ class NidaqManager(SignalInterface):
         """ Simplified function to create an analog input task """
         if self.__simulating:
             return None
-        # Check if a task with the same name already exists and clear it
-        try:
-            existing_task = nidaqmx.Task(name)
-            existing_task.close()  # Close the existing task to avoid conflicts
-        except nidaqmx.errors.DaqError as e:
-            # Handle case where task does not exist (normal behavior)
-            pass
-         # Now proceed with task creation
 
         aitask = nidaqmx.Task(name)
         #channels = np.atleast_1d(channels)
@@ -420,10 +397,19 @@ class NidaqManager(SignalInterface):
                 self.sigScanStarted.emit()
                 self.__logger.info('Nidaq scan started!')
 
-    def stopTask(self, taskName):
+    def stopTask(self, taskName):      
         self.tasks[taskName].stop()
         self.tasks[taskName].close()
         del self.tasks[taskName]
+        """print(f'Stopping task: {taskName}')
+        if taskName in self.tasks:
+            self.tasks[taskName].stop()
+            self.tasks[taskName].close()
+            del self.tasks[taskName]
+            print(f'Task {taskName} stopped and closed.')
+        else:
+            print(f'Task {taskName} not found in tasks.')"""
+
 
     def inputTaskDone(self, taskName):
         if not self.signalSent:

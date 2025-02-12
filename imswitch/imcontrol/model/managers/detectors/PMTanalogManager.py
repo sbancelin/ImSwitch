@@ -39,7 +39,7 @@ class PMTanalogManager(DetectorManager):
         self._frameCount = 0
         self.__newFrameReady = False
         self._debug_mode = False  # run mode for plotting detected samples
-        self._simulation_mode = True  # run mode for generating detected samples
+        self._simulation_mode = False  # run mode for generating detected samples
 
         # Prepare parameters and signal connections
         parameters = {}
@@ -125,6 +125,7 @@ class PMTanalogManager(DetectorManager):
         self.setPixelSize(px_sizes[::-1])
 
     def updateImage(self, pixels, pos: tuple):
+        pass
         # pos: tuple with current pos for new pixels to be entered, from high dim to low dim (ending at d2)
         (*pos_rest, pos_d2) = (0,) + pos
         img_slice = tuple(pos_rest)+tuple([pos_d2,])
@@ -175,14 +176,13 @@ class PMTanalogManager(DetectorManager):
     def scale(self):
         return self.__pixel_sizes[::-1]
         
-    """
     @property
     def pixelSizeUm(self):
         return [1, self.__pixel_sizes[-2], self.__pixel_sizes[-1]]
-        """
-    @property
+
+    """@property
     def pixelSizeUm(self):
-        return [1, *self.__pixel_sizes]
+        return [1, *self.__pixel_sizes]"""
 
     def setPixelSize(self, pixel_sizes: list):
         # pixel_sizes: list of low dim to high dim
@@ -217,6 +217,7 @@ class PMTanalogManager(DetectorManager):
             return np.expand_dims(np.squeeze(im_ret), axis=0).astype(int), ax_rem
 
 class ScanWorker(Worker):
+    d1Step = Signal(np.ndarray, tuple)
     d2Step = Signal(np.ndarray, tuple)
     d3Step = Signal()
     # newLine = Signal(np.ndarray, int, int)
@@ -259,7 +260,7 @@ class ScanWorker(Worker):
         self._samples_d_scanstep = [round(samples)*self._frac_scan_det_rate for samples in scanInfoDict['scan_samples']]
 
         # det samples per line:
-        #self._samples_line = round(scanInfoDict['scan_samples'][1] * self._frac_scan_det_rate)
+        self._samples_line = round(scanInfoDict['scan_samples'][1] * self._frac_scan_det_rate)
 
         # det samples per fast axis period
         self._samples_d2_period = round(scanInfoDict['scan_samples_d2_period'] * self._frac_scan_det_rate)
@@ -316,7 +317,7 @@ class ScanWorker(Worker):
                     throwdata = self.randomInput(datalen)
             else:
                     throwdata = self._manager._nidaqManager.readInputTask(self._name, datalen)
-            if self._manager._debug_mode:
+            #if self._manager._debug_mode:
                     self.__plot_curves(plot=True, xvals=range(int((self._samples_read)/10),
                                                             int((self._samples_read+datalen)/10)),
                                                             signal=self._ploty*np.ones(int((datalen)/10)),
@@ -331,7 +332,7 @@ class ScanWorker(Worker):
             data = self.randomInput(datalen)
         else:
             data = self._manager._nidaqManager.readInputTask(self._name, datalen)
-        if self._manager._debug_mode:
+        #if self._manager._debug_mode:
             self.__plot_curves(plot=True, xvals=range(int((self._samples_read)/10),
                                                     int((self._samples_read+datalen)/10)),
                                                     signal=self._ploty*np.ones(int((datalen)/10)),
@@ -349,12 +350,12 @@ class ScanWorker(Worker):
         line_pixels = np.array(line_samples).reshape(-1, self._frac_det_dwell).mean(axis=1)
         return line_pixels
 
-    def __plot_curves(self, plot, xvals, signal):
+    def __plot_curves(self, plot, xvals, signal, style='k-'):
         """ Plot detection curves, for debugging. """
         if plot:
             import matplotlib.pyplot as plt
             plt.figure(1)
-            plt.plot(xvals, signal)
+            plt.plot(xvals, signal, style)
             self._ploty += 0.01
             if self._ploty > 1.1:
                 self._ploty = 1
@@ -362,8 +363,8 @@ class ScanWorker(Worker):
     def run(self):
         """ Main run for acquisition.
         """
-        if self._manager._debug_mode:
-            self._ploty = 1
+        #if self._manager._debug_mode:
+        self._ploty = 1
         # create empty current position counter
         self._pos = np.zeros(len(self._img_dims), dtype='uint16')
         # throw away phase delay samples and start zero samples
@@ -382,7 +383,7 @@ class ScanWorker(Worker):
         self.run_loop_dx(dim=len(self._img_dims))
 
         # emit acquisition done signal
-        self._manager._nidaqManager.finishExternalMock()
+        #self._manager._nidaqManager.finishExternalMock()
         self.acqDoneSignal.emit()
 
         # throw acquisition-final positioning data
@@ -432,8 +433,11 @@ class ScanWorker(Worker):
                 if dim > 3:
                     self.throwdata(self._samples_padlens[dim-1])
                     """              
-            else:
+            elif dim == 2:
                 self.run_loop_d2()
+            else:
+                self.run_loop_d1()
+
             self._pos[dim-1] += 1
         self._pos[dim-1] = 0
 
@@ -469,7 +473,7 @@ class ScanWorker(Worker):
                 line_samples = np.multiply(line_samples, 1*ttl_seq)
             
             # Process the data for photon counts (or analog signals in this case)
-            # line_samples = data[:self._samples_line]
+            line_samples = data[:self._samples_line]
             
             # resample sample array to pixel counts array
             pixels = self.samples_to_pixels(line_samples)
@@ -479,17 +483,47 @@ class ScanWorker(Worker):
             self.__logger.debug('Close data reading: not scanning any longer')
             self.close()
 
+    def run_loop_d1(self):
+        """ Reading data on dim = 1, converting data to pixels, and emitting the d1 step of pixels. """
+        if self.scanning:
+            # Read data for the entire scan step
+            if self._manager._ttlmultiplying:
+                seq_signal_xstart = self._samples_read - self._phase_delay
+            data = self.readdata(self._samples_d_scanstep[0])
+            if self._manager._ttlmultiplying:
+                seq_signal_xend = self._samples_read - self._phase_delay
+                ttl_seq = self._seq_signal[seq_signal_xstart:seq_signal_xend]
+
+            # Get photon counts from data array (which is cumsummed)
+            data_cnts = np.concatenate(([data[0] - self._last_value], np.diff(data)))
+            self._last_value = data[-1]
+
+            # Process the data for photon counts (or analog signals in this case)
+            line_samples = data_cnts
+            if self._manager._ttlmultiplying:
+                line_samples = np.multiply(line_samples, ttl_seq)
+
+            # Resample sample array to pixel counts array
+            pixels = self.samples_to_pixels(line_samples)
+
+            # Signal new line of pixels, and the insertion position in all dimensions
+            self.d1Step.emit(pixels, (self._pos[0],))
+        else:
+            self.__logger.debug('Close data reading: not scanning any longer')
+            self.close()
+
+
     def close(self):
-        pass
+        #pass
         self._manager._nidaqManager.inputTaskDone(self._name)
 
     def randomInput(self, datalen):
         return np.random.randint(100, size=datalen)
-    """
-    def close(self):
+    
+    #def close(self):
         #pass
-        #self._manager._nidaqManager.inputTaskDone(self._name)
-        self.__logger.debug('Closing ScanWorker and associated NI-DAQ task')
+    #    self._manager._nidaqManager.inputTaskDone(self._name)
+        """self.__logger.debug('Closing ScanWorker and associated NI-DAQ task')
         try:
             # Assurez-vous que la tâche est arrêtée et fermée
             self._manager._nidaqManager.inputTaskDone(self._name)
@@ -497,9 +531,7 @@ class ScanWorker(Worker):
         except nidaqmx.errors.DaqError as e:
             self.__logger.error(f"Error closing NI-DAQ task: {e}")
         except Exception as e:
-            self.__logger.error(f"Unexpected error: {e}")
-
-        """
+            self.__logger.error(f"Unexpected error: {e}")"""
 
 
 # Copyright (C) 2020-2023 ImSwitch developers

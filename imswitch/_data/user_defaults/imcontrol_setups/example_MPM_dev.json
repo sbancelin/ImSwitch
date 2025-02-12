@@ -51,7 +51,8 @@
 	},
 	"nidaq": {
 		"timerCounterChannel": "Dev1/ctr2",
-		"startTrigger": true
+		"startTrigger": true,
+		"simulation": false
 	},
 	"positioners": {
         "X-Galvo": {
@@ -94,7 +95,8 @@
 				"tolerance": 1e-3
 			},
 			"axes": ["Z"],
-			"forPositioning": true
+			"forPositioning": true,
+			"forScanning": true
 		}
     },
     "scan": {
