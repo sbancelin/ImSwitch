@@ -401,15 +401,6 @@ class NidaqManager(SignalInterface):
         self.tasks[taskName].stop()
         self.tasks[taskName].close()
         del self.tasks[taskName]
-        """print(f'Stopping task: {taskName}')
-        if taskName in self.tasks:
-            self.tasks[taskName].stop()
-            self.tasks[taskName].close()
-            del self.tasks[taskName]
-            print(f'Task {taskName} stopped and closed.')
-        else:
-            print(f'Task {taskName} not found in tasks.')"""
-
 
     def inputTaskDone(self, taskName):
         if not self.signalSent:

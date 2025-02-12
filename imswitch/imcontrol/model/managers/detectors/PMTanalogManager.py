@@ -125,7 +125,7 @@ class PMTanalogManager(DetectorManager):
         self.setPixelSize(px_sizes[::-1])
 
     def updateImage(self, pixels, pos: tuple):
-        pass
+        #pass
         # pos: tuple with current pos for new pixels to be entered, from high dim to low dim (ending at d2)
         (*pos_rest, pos_d2) = (0,) + pos
         img_slice = tuple(pos_rest)+tuple([pos_d2,])
@@ -176,13 +176,13 @@ class PMTanalogManager(DetectorManager):
     def scale(self):
         return self.__pixel_sizes[::-1]
         
-    @property
-    def pixelSizeUm(self):
-        return [1, self.__pixel_sizes[-2], self.__pixel_sizes[-1]]
-
     """@property
     def pixelSizeUm(self):
-        return [1, *self.__pixel_sizes]"""
+        return [1, self.__pixel_sizes[-2], self.__pixel_sizes[-1]]"""
+
+    @property
+    def pixelSizeUm(self):
+        return [1, *self.__pixel_sizes]
 
     def setPixelSize(self, pixel_sizes: list):
         # pixel_sizes: list of low dim to high dim

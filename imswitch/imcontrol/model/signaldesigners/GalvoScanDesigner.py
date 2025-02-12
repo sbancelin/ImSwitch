@@ -90,11 +90,11 @@ class GalvoScanDesigner(ScanDesigner):
         device_count = len(positioners)
         # convert vel_max from µm/µs to V/µs
         vel_max = [positionerProps['vel_max'] / positionerProps['conversionFactor']
-                   if 'vel_max' in positionerProps else 1e2
+                   if 'vel_max' in positionerProps else 1e3
                    for positionerProps in positionersProps]
         # convert acc_max from µm/µs^2 to V/µs^2
         acc_max = [positionerProps['acc_max'] / positionerProps['conversionFactor']
-                   if 'acc_max' in positionerProps else 1e2
+                   if 'acc_max' in positionerProps else 1e3
                    for positionerProps in positionersProps]
 
         # get conversion factors for scanning axes
@@ -150,7 +150,8 @@ class GalvoScanDesigner(ScanDesigner):
         pos = []  # list with all axis positions lists
         # d1 axis signal
         axis = 0
-        pos_temp, samples_d2_period = self.__generate_smooth_scan(parameterDict, self.axis_vel_max[0], self.axis_acc_max[0], n_steps_dx[0])
+        pos_temp, samples_d2_period = self.__generate_smooth_scan(parameterDict, self.axis_vel_max[0],
+                                                                  self.axis_acc_max[0], n_steps_dx[0])
         pos.append(pos_temp)
 
         # initiate pad length list
@@ -180,8 +181,7 @@ class GalvoScanDesigner(ScanDesigner):
         # d>2 axes signals - all generated as pure step signals
         if axis_count_scan > 2:
             for axis in range(2, axis_count_scan):
-                # pos, pad_max = self.__zero_padding(pos, padlen_base=[0,0])
-                #☺pos_temp = np.asarray(pos_temp, dtype=np.float64)  # Ensure pos_temp is a float64 numpy array               
+                pos, pad_max = self.__zero_padding(pos, padlen_base=[0,0])         
                 pos = self.__repeat_dlower(pos, n_steps_dx[axis])
                 #smooth = False if 'mock' in self.axis_devs_order[axis].lower() else True
                 pos_temp, pad_prev_axis  = self.__generate_step_scan(axis,
@@ -192,7 +192,6 @@ class GalvoScanDesigner(ScanDesigner):
                                                      v_max=self.axis_vel_max[axis],
                                                      a_max=self.axis_acc_max[axis],
                                                      axis_reps=axis_reps)
-                #pos_temp = np.asarray(pos_temp, dtype=np.float64)  # Ensure pos_temp is a float64 numpy array
                 if pad_prev_axis:
                     pos, _ = self.__zero_padding(pos, padlen_base=pad_prev_axis)
                     #pad_prev_axes.append(pad_prev_axis)
@@ -293,6 +292,7 @@ class GalvoScanDesigner(ScanDesigner):
         pos = self.__generate_smooth_multid2(curve_poly, time_fix, pos_fix, n_eval, n_d2)
         # add missing start and end piece
         pos_ret = self.__add_start_end(pos, pos_fix, v_max, a_max)
+        
         return pos_ret, n_eval
 
     def __generate_step_scan(self, dim, len_axis, n_axis, smooth_axis, v_max, a_max, axis_reps=[0,0]):
@@ -519,9 +519,6 @@ class GalvoScanDesigner(ScanDesigner):
         # give positions, velocity, acceleration, and time of fixed points
         yder = np.array([pos, vel, acc]).T.tolist()
 
-        #print('time:', time)
-        #print('yder:', yder)
-
         bpoly = BPoly.from_derivatives(time, yder)  # bpoly time unit: µs
 
         # get number of evaluation points
@@ -645,7 +642,6 @@ class GalvoScanDesigner(ScanDesigner):
         # pad arrays
         for axis, pos_axis in enumerate(pos):
             pos_temp = np.pad(pos_axis, padlens[axis], 'constant', constant_values=0)
-            #pos_temp = pos_temp.astype(np.float64)  # Ensure the type is float64
             pos_ret.append(pos_temp)
         return pos_ret, padlens[0][1]
 

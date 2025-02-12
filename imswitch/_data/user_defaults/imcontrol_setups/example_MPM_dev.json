@@ -95,8 +95,7 @@
 				"tolerance": 1e-3
 			},
 			"axes": ["Z"],
-			"forPositioning": true,
-			"forScanning": true
+			"forPositioning": true
 		}
     },
     "scan": {
