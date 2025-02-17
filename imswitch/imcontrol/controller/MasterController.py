@@ -4,9 +4,9 @@ import pkg_resources
         
 from imswitch.imcontrol.model import (
     DetectorsManager, LasersManager, ShuttersManager, MultiManager, PositionersManager,
-    RecordingManager, RS232sManager, NidaqManager, SLMManager, SIMManager, DPCManager, LEDMatrixsManager, MCTManager, ROIScanManager, MockXXManager, WebRTCManager, HyphaManager,
+    RecordingManager, RS232sManager, NidaqManager, SLMManager, SIMManager, DPCManager, MCTManager, ROIScanManager, MockXXManager, WebRTCManager, HyphaManager,
     ISMManager, AutofocusManager, HistoScanManager, PixelCalibrationManager, LightsheetManager, FOVLockManager,
-    StandManager, RotatorsManager, JetsonNanoManager, LEDsManager, ScanManagerBase, ScanManagerPointScan, ScanManagerMoNaLISA, FlatfieldManager, 
+    StandManager, RotatorsManager, JetsonNanoManager, ScanManagerBase, ScanManagerPointScan, ScanManagerMoNaLISA, FlatfieldManager, 
     FlowStopManager, SetupInfo
 )
 
@@ -41,12 +41,9 @@ class MasterController:
         self.positionersManager = PositionersManager(self.__setupInfo.positioners,
                                                      self.__commChannel,
                                                      **lowLevelManagers)
-        self.LEDMatrixsManager = LEDMatrixsManager(self.__setupInfo.LEDMatrixs,
-                                           **lowLevelManagers)
         self.rotatorsManager = RotatorsManager(self.__setupInfo.rotators,
                                             **lowLevelManagers)
 
-        self.LEDsManager = LEDsManager(self.__setupInfo.LEDs)
         self.recordingManager = RecordingManager(self.detectorsManager)
         self.slmManager = SLMManager(self.__setupInfo.slm)
         self.simManager = SIMManager(self.__setupInfo.sim)

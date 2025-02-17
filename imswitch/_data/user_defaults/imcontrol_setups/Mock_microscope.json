@@ -9,13 +9,23 @@
 			  "cameraListIndex": null
 			},
 			"forAcquisition": true
+		},
+        "PMT-Vis": {
+			"analogChannel": null,
+			"digitalLine": null,
+			"managerName": "PMTanalogManager",
+			"managerProperties": {
+			  "AIchannel": "Dev1/ai1",
+			  "cameraListIndex": null
+			},
+			"forAcquisition": true
 		}
 	},
 	"lasers": {
-		"Alphanov_mock": {
+        "Alphanov_mock": {
 			"analogChannel": null,
 			"digitalLine": null,
-			"managerName": "ThorlabsMockLaserManager",
+			"managerName": "MockLaserManager",
 			"managerProperties": {
 				"serial_no_rotator": "27005331",
 				"conversion_factor": 1919.14,
@@ -25,11 +35,11 @@
 			"valueRangeMin": 0,
 			"valueRangeMax": 180,
 			"valueRangeStep": 1
-		  },
-		  "Mira 900": {
+		},  
+        "Mira 900": {
 			"analogChannel": null,
 			"digitalLine": null,
-			"managerName": "ThorlabsMockLaserManager",
+			"managerName": "MockLaserManager",
 			"managerProperties": {
 				"serial_no_rotator": "27269600",
 				"conversion_factor": 1919.14,
@@ -39,11 +49,39 @@
 			"valueRangeMin": 0,
 			"valueRangeMax": 180,
 			"valueRangeStep": 1
-		  }
+		},
+          "Cobolt660": {
+			"analogChannel": null,
+			"digitalLine": null,
+			"managerName": "MockLaserManager",
+			"managerProperties": {
+				"serial_no_rotator": "27269600",
+				"conversion_factor": 1919.14,
+				"velocity": 429410
+			},
+			"wavelength": 700,
+			"valueRangeMin": 0,
+			"valueRangeMax": 180,
+			"valueRangeStep": 1
+		},
+        "Alcor920": {
+			"analogChannel": null,
+			"digitalLine": null,
+			"managerName": "MockLaserManager",
+			"managerProperties": {
+				"serial_no_rotator": "27269600",
+				"conversion_factor": 1919.14,
+				"velocity": 429410
+			},
+			"wavelength": 700,
+			"valueRangeMin": 0,
+			"valueRangeMax": 180,
+			"valueRangeStep": 1
+		}
 	},
 	"shutters": {
 		"Main_shutter": {
-			"managerName": "ThorlabsShutterManager",
+			"managerName": "MockShutterManager",
 			"managerProperties": {
 				"serial_no_shutter": "68800404"
 			}
@@ -51,8 +89,7 @@
 	},
 	"nidaq": {
 		"timerCounterChannel": "Dev1/ctr2",
-		"startTrigger": true,
-		"simulation": false
+		"startTrigger": true
 	},
 	"positioners": {
         "X-Galvo": {
@@ -60,7 +97,7 @@
 			"digitalLine": null,
 			"managerName": "NidaqPositionerManager",
 			"managerProperties": {
-				"conversionFactor": 50,
+				"conversionFactor": 70,
 				"minVolt": -10,
 				"maxVolt": 10,
 				"vel_max": 7e-2,
@@ -74,7 +111,7 @@
 			"digitalLine": null,
 			"managerName": "NidaqPositionerManager",
 			"managerProperties": {
-				"conversionFactor": 50,
+				"conversionFactor": 70,
 				"minVolt": -10,
 				"maxVolt": 10,
 				"vel_max": 7e-2,
@@ -86,7 +123,7 @@
 		"Z-Vcoil": {
 			"analogChannel": null,
 			"digitalLine": null,
-			"managerName": "PIFOCManager",
+			"managerName": "MockPositionerManager",
 			"managerProperties": {
 				"serialnum": "123041734",
 				"vel": 100,
@@ -95,7 +132,8 @@
 				"tolerance": 1e-3
 			},
 			"axes": ["Z"],
-			"forPositioning": true
+			"forPositioning": true,
+			"forScanning": true
 		}
     },
     "scan": {

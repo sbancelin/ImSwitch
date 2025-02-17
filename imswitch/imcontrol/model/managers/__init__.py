@@ -5,8 +5,6 @@ from .FOVLockManager import FOVLockManager
 from .DetectorsManager import DetectorsManager, NoDetectorsError
 from .LasersManager import LasersManager
 from .ShuttersManager import ShuttersManager
-from .LEDsManager import LEDsManager
-from .LEDMatrixsManager import LEDMatrixsManager
 from .MultiManager import MultiManager
 from .NidaqManager import NidaqManager
 from .PositionersManager import PositionersManager

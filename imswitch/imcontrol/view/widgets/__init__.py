@@ -20,7 +20,6 @@ if not IS_HEADLESS:
     from .FlowStopWidget import FlowStopWidget
     from .ObjectiveRevolverWidget import ObjectiveRevolverWidget
     from .TemperatureWidget import TemperatureWidget
-    from .LEDMatrixWidget import LEDMatrixWidget
     from .WellPlateWidget import WellPlateWidget
     from .FocusLockWidget import FocusLockWidget
     from .FOVLockWidget import FOVLockWidget
@@ -28,7 +27,6 @@ if not IS_HEADLESS:
     from .LaserWidget import LaserWidget
     from .ShutterWidget import ShutterWidget
     from .MotCorrWidget import MotCorrWidget
-    from .LEDWidget import LEDWidget
     from .PositionerWidget import PositionerWidget
     from .StandaPositionerWidget import StandaPositionerWidget
     from .StandaStageWidget import StandaStageWidget
@@ -39,7 +37,6 @@ if not IS_HEADLESS:
     from .ScanWidgetPointScan import ScanWidgetPointScan
     from .RotationScanWidget import RotationScanWidget
     from .RotatorWidget import RotatorWidget
-    from .UC2ConfigWidget import UC2ConfigWidget
     from .SIMWidget import SIMWidget
     from .DPCWidget import DPCWidget
     from .MCTWidget import MCTWidget
