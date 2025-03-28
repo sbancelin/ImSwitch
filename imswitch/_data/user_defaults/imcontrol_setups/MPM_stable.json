@@ -5,7 +5,7 @@
 			"digitalLine": null,
 			"managerName": "PMTanalogManager",
 			"managerProperties": {
-			  "AIchannel": "Dev1/ai0",
+			  "AIchannel": "Dev1/ai1",
 			  "cameraListIndex": null
 			},
 			"forAcquisition": true
@@ -95,7 +95,8 @@
 				"tolerance": 1e-3
 			},
 			"axes": ["Z"],
-			"forPositioning": true
+			"forPositioning": true,
+            "forScanning": true
 		}
     },
     "scan": {
