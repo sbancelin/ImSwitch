@@ -70,8 +70,6 @@ class SLMController(ImConWidgetController):
         self._widget.setSLMDisplayMonitor(monitor)
 
     def displayMask(self, maskCombined):
-        """ Display the mask in the SLM display. Originates from slmPy:
-        https://github.com/wavefrontshaping/slmPy """
 
         arr = maskCombined.image()
 
@@ -204,13 +202,11 @@ class SLMController(ImConWidgetController):
                 )
 
     def setMask(self, maskMode):
-        # 0 = donut (left), 1 = tophat (right)
-        mask = self._widget.controlPanel.maskComboBox.currentIndex()
-        if maskMode != MaskMode.Black:
-            slm_info_dict = self.getInfoDict(generalParams=self._widget.slmParameterTree.p,
-                                            aberParams=self._widget.aberParameterTree.p)
-            self.applyAberrations(slm_info_dict["aber"], mask)
+        mask = self._widget.controlPanel.maskComboBox.currentIndex()  # 0 = donut (left), 1 = tophat (right)
         self._master.slmManager.setMask(mask, maskMode)
+        slm_info_dict = self.getInfoDict(generalParams=self._widget.slmParameterTree.p,
+                                        aberParams=self._widget.aberParameterTree.p)
+        self.applyAberrations(slm_info_dict["aber"], mask)
         image = self._master.slmManager.update(maskChange=True, tiltChange=True, aberChange=True)
         self.updateDisplayImage(image)
 
@@ -235,7 +231,7 @@ class SLMController(ImConWidgetController):
         self._widget.img.setImage(image, autoLevels=True, autoDownsample=False)
 
 
-# Copyright (C) 2020-2021 ImSwitch developers
+# Copyright (C) 2020-2023 ImSwitch developers
 # This file is part of ImSwitch.
 #
 # ImSwitch is free software: you can redistribute it and/or modify

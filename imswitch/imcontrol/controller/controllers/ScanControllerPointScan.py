@@ -86,6 +86,14 @@ class ScanControllerPointScan(SuperScanController):
             self.isRunning = False
             self.abortScan()
 
+    def stopScan(self):
+        #Stops the current scan.
+        if self.isRunning:
+            self._logger.info("Stopping scan...")
+            self.isRunning = False
+            self._master.nidaqManager.stopTask()  # Assurez-vous que cette méthode existe dans nidaqManager
+            self.abortScan()
+
     def scanDone(self):
         self.isRunning = False
 
@@ -166,6 +174,7 @@ class ScanControllerPointScan(SuperScanController):
         self._digitalParameterDict['sequence_time'] = self._widget.getSeqTimePar()
         self._analogParameterDict['sequence_time'] = self._widget.getSeqTimePar()
         self._analogParameterDict['phase_delay'] = self._widget.getPhaseDelayPar()
+        self._analogParameterDict['d3step_delay'] = self._widget.getd3StepDelayPar()
         #self._analogParameterDict['extra_laser_on'] = self._widget.getExtraLaserOnPar()
 
     def updatePixels(self):
@@ -210,7 +219,7 @@ class ScanControllerPointScan(SuperScanController):
         self.setParameters()
 
 
-# Copyright (C) 2020-2021 ImSwitch developers
+# Copyright (C) 2020-2023 ImSwitch developers
 # This file is part of ImSwitch.
 #
 # ImSwitch is free software: you can redistribute it and/or modify
