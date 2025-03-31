@@ -5,6 +5,7 @@ import warnings
 import nidaqmx
 import nidaqmx._lib
 import nidaqmx.constants
+from threading import Thread
 import numpy as np
 
 from imswitch.imcommon.framework import Signal, SignalInterface, Thread
@@ -74,7 +75,7 @@ class NidaqManager(SignalInterface):
                                           samps_per_chan=sampsInScan)
         if starttrig:
             aotask.triggers.start_trigger.cfg_dig_edge_start_trig(reference_trigger)
-        #self.__logger.debug(f'Created AO task: {name}')
+        # self.__logger.debug(f'Created AO task: {name}')
         return aotask
 
     def __createLineDOTask(self, name, lines, acquisitionType, source, rate, sampsInScan=1000,
@@ -143,21 +144,19 @@ class NidaqManager(SignalInterface):
 
     def __createChanAITask(self, name, channel, acquisitionType, source, rate,
                            #min_val=-0.5, max_val=10.0,
-                           sampsInScan=1000, starttrig=False,
-                           reference_trigger='ai/StartTrigger'):
+                           sampsInScan=1000, starttrig=False, reference_trigger='ai/StartTrigger'):
         """ Simplified function to create an analog input task """
         if self.__simulating:
             return None
-
+        
         aitask = nidaqmx.Task(name)
-        #channels = np.atleast_1d(channels)
-        #print('channels:', channels)
+        print("nidaq channels", channel)
+        aitaskchannel = aitask.ai_channels.add_ai_voltage_chan(channel)
+        aitaskchannel.ai_data_xfer_mech = nidaqmx.constants.DataTransferActiveTransferMode.DMA
 
         if acquisitionType == 'finite':
             acqType = nidaqmx.constants.AcquisitionType.FINITE
 
-        #for channel in channels:
-        aitask.ai_channels.add_ai_voltage_chan(channel)
         aitask.timing.cfg_samp_clk_timing(source=source,
                                           rate=rate,
                                           sample_mode=acqType,
@@ -340,7 +339,7 @@ class NidaqManager(SignalInterface):
                 clockDO = scanclock
                 if len(AOsignals) > 0:
                     scanSampsInScan = len(AOsignals[0])
-                    self.__logger.info(f'Total scan samples in scan: {scanSampsInScan}')
+                    # self.__logger.info(f'Total scan samples in scan: {scanSampsInScan}')
                     self.__logger.info(f'Total scan time: {scanSampsInScan / 0.1e6} s')
                     self.aoTask = self.__createChanAOTask('ScanAOTask', AOchannels,
                                                           acquisitionTypeFinite, scanclock,

@@ -2,6 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 from imswitch.imcommon.framework import Signal, Thread, Worker
+from PyQt5.QtCore import QThread
 from imswitch.imcommon.model import initLogger
 from .DetectorManager import DetectorManager
 
@@ -14,6 +15,9 @@ class PMTanalogManager(DetectorManager):
     - ``AIchannel`` -- the physical input terminal on the Nidaq to which the PMT
       is connected (e.g., AI0)
     """
+
+    _shared_task = None  # Tâche partagée pour tous les détecteurs
+    _active_channels = []  # Liste des canaux actifs
 
     def __init__(self, detectorInfo, name, nidaqManager, **_lowLevelManagers):
         self.__logger = initLogger(self, instanceName=name)
@@ -41,6 +45,10 @@ class PMTanalogManager(DetectorManager):
         self._debug_mode = False  # run mode for plotting detected samples
         self._simulation_mode = False  # run mode for generating detected samples
 
+        # Enregistrement du canal dans la liste globale
+        if self.acquisition and self._channel not in PMTanalogManager._active_channels:
+            PMTanalogManager._active_channels.append(self._channel)
+
         # Prepare parameters and signal connections
         parameters = {}
         self._nidaqManager = nidaqManager
@@ -48,10 +56,11 @@ class PMTanalogManager(DetectorManager):
             lambda scanInfoDict, signalDict, _: self.initiateScan(scanInfoDict, signalDict)
         )
         self._nidaqManager.sigScanStarted.connect(self.startScan)
+
         self.__shape = fullShape
         super().__init__(detectorInfo, name, fullShape=fullShape, supportedBinnings=[1],
                          model=model, parameters=parameters, croppable=False)
-
+        
     def __del__(self):
         if self._scanThread is not None:
             self._scanThread.quit()
@@ -60,9 +69,12 @@ class PMTanalogManager(DetectorManager):
             super().__del__()
     
     def initiateScan(self, scanInfoDict, signalDict):
+        """
+        Initialise l'acquisition en partageant la tâche DAQ si possible.
+        """
         if self.acquisition:
             self._scanWorker = ScanWorker(self, scanInfoDict, signalDict)
-            self._scanThread = Thread()
+            self._scanThread = QThread()
             self._scanWorker.moveToThread(self._scanThread)
             self._scanThread.started.connect(self._scanWorker.run)
             self._scanWorker.scanning = True
@@ -77,7 +89,10 @@ class PMTanalogManager(DetectorManager):
 
     def startScan(self):
         if self.acquisition:
-            self._scanThread.start()
+            if self._scanThread is None:
+                print("Erreur : self._scanThread n'est pas initialisé.")
+            else:
+                self._scanThread.start()
 
     def startAcquisition(self):
         self.acquisition = True
@@ -106,6 +121,14 @@ class PMTanalogManager(DetectorManager):
             self.__newFrameReady = True
         except Exception:
             pass
+
+        # Ferme la tâche partagée si plus d'acquisition active
+        if PMTanalogManager._shared_task is not None:
+            print("Arrêt de la tâche DAQ partagée.")
+            self._nidaqManager.stopTask(PMTanalogManager._shared_task)
+            PMTanalogManager._shared_task = None
+            PMTanalogManager._active_channels = []
+
         if self._debug_mode:
             plt.show()
 
@@ -274,19 +297,6 @@ class ScanWorker(Worker):
         self._throw_settling = round(scanInfoDict['scan_throw_settling'] * self._frac_scan_det_rate)  # settling time
         self._throw_startacc = round(scanInfoDict['scan_throw_startacc'] * self._frac_scan_det_rate)  # starting acceleration
 
-
-        # Other parameters for throwaway samples (like initial positioning)
-        # self._throw_startzero = round(scanInfoDict['scan_throw_startzero'] * self._frac_scan_det_rate)      
-        # self._throw_initpos = round(scanInfoDict['scan_pads_initpos'] * self._frac_scan_det_rate)
-        # self._throw_settling = round(scanInfoDict['scan_throw_settling'] * self._frac_scan_det_rate)
-        # self._throw_startacc = round(scanInfoDict['scan_throw_startacc'] * self._frac_scan_det_rate)
-        # self._throw_finalpos = round(scanInfoDict['scan_throw_finalpos'] * self._frac_scan_det_rate)
-        # Scan samples in a d3 step (period)
-        # self._samples_d3_step = round(scanInfoDict['scan_samples'][2] * self._frac_scan_det_rate)
-        # Scan samples for zero padding at end of scanning curve dimensions
-        
-        # self._samples_padlens = [round(scanInfoDict['padlens'][i] * self._frac_scan_det_rate) for i in range(len(scanInfoDict['padlens']))]
-
         self._phase_delay = int(scanInfoDict['phase_delay']) # phase delay samples - galvo response time
         self._smooth_axes = scanInfoDict['smooth_axes']
 
@@ -300,11 +310,31 @@ class ScanWorker(Worker):
         self._throw_init_higher_d = False
 
         # Additional setup for managing analog input instead of digital counts
+        # Démarrage de la tâche d'acquisition NI-DAQ
         if not self._manager._simulation_mode:
+            print(f"Initialisation NI-DAQ pour les canaux {self._channel}...")
+            try:
+                # On passe tous les canaux sous une seule tâche
+                #task_name= "PMT-Task"
+                self._manager._nidaqManager.startInputTask(
+                    self._name, 'ai', self._channel, 'finite',
+                    self._manager._nidaq_clock_source, self._manager._detection_samplerate,
+                    self._samples_total, True, 'ao/StartTrigger'  # Pas de trigger externe
+                )
+                print(f"NI-DAQ initialisé pour les canaux {self._channel}")
+            except Exception as e:
+                print(f"ERREUR NI-DAQ pour {self._name} : {e}")
+
+
+        """if not self._manager._simulation_mode:
+            print("name in PMT manager", self._name)
+            print("channel in PMT manager", self._channel)
             self._manager._nidaqManager.startInputTask(self._name, 'ai', self._channel, 'finite',
                                                        self._manager._nidaq_clock_source,
                                                        self._manager._detection_samplerate,
                                                        self._samples_total, True, 'ao/StartTrigger')
+                                                       """
+        
         self._manager.initiateImage(self._img_dims)
         self._manager.setPixelSize(scanInfoDict['pixel_sizes'])  # 'pixel_sizes' order: low dim to high dim
 

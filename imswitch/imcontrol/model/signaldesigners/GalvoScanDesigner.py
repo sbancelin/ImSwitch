@@ -234,8 +234,7 @@ class GalvoScanDesigner(ScanDesigner):
             'tot_scan_time_s': tot_scan_time,
             'smooth_axes': self.__smooth_axis
         }
-
-        print('minmax:', scanInfoDict['minmaxes'])
+        #print('minmax:', scanInfoDict['minmaxes'])
 
         if self._debug_mode:
             self._logger.debug(scanInfoDict)

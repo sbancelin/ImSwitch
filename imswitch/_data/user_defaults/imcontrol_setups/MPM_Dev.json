@@ -5,23 +5,21 @@
 			"digitalLine": null,
 			"managerName": "PMTanalogManager",
 			"managerProperties": {
-			  "AIchannel": "Dev1/ai0",
+			  "AIchannel": 1,
 			  "cameraListIndex": null
 			},
 			"forAcquisition": true
 		},
-        "detectors": {
-            "PMT-IR": {
-                "analogChannel": null,
-                "digitalLine": null,
-                "managerName": "PMTanalogManager",
-                "managerProperties": {
-                  "AIchannel": "Dev1/ai1",
-                  "cameraListIndex": null
-                },
-                "forAcquisition": true
-            }
-        }
+		"PMT-IR": {
+			"analogChannel": null,
+			"digitalLine": null,
+			"managerName": "PMTanalogManager",
+			"managerProperties": {
+			  "AIchannel": 3,
+			  "cameraListIndex": null
+			},
+			"forAcquisition": true
+		}
 	},
 	"lasers": {
 		"Alphanov_mock": {

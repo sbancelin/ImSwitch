@@ -1,24 +1,14 @@
 {
 	"detectors": {
-		"PMT-Vis": {
-			"analogChannel": null,
-			"digitalLine": null,
-			"managerName": "PMTanalogManager",
-			"managerProperties": {
-			  "AIchannel": "Dev1/ai0",
-			  "cameraListIndex": null
-			},
-			"forAcquisition": true
+		"PMTs": {
+		"analogChannels": null,
+		"digitalLine": null,
+		"managerName": "PMTanalogManager",
+		"managerProperties": {
+			"AIchannel": "Dev1/ai1",
+			"cameraListIndex": null
 		},
-        "PMT-Vis": {
-			"analogChannel": null,
-			"digitalLine": null,
-			"managerName": "PMTanalogManager",
-			"managerProperties": {
-			  "AIchannel": "Dev1/ai1",
-			  "cameraListIndex": null
-			},
-			"forAcquisition": true
+		"forAcquisition": true
 		}
 	},
 	"lasers": {
